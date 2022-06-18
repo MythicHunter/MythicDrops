@@ -5,9 +5,13 @@
 ### Goal: Making locating rare drops easier
 
 ## Commands
-
+All commands are case-insensitive.
 - /mythic - General config (toggle/autotrack) 
 - /star <add/remove/list> [args...] - Adds custom names
+
+Star also allows regex, commands:
+- /star addregex/removeregex/listregex
+
 
 ## Building
 
