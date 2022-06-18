@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 @Mod(modid = Main.MODID, name = Main.NAME, version = Main.VERSION)
 public class Main
@@ -23,6 +24,7 @@ public class Main
     static boolean debug = false;
     static Set<String> mythic = new HashSet<>();
     static Set<String> star = new HashSet<>();
+    static Set<Pattern> regexStar = new HashSet<>();
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)

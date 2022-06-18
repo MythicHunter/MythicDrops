@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ParametersAreNonnullByDefault
 public class DetectMythics {
@@ -54,9 +56,18 @@ public class DetectMythics {
         String itemName = nbt.getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Name");
         if (Main.mythic.contains(itemName)) {
             mythicFound(item, itemName, true);
+            return;
         }
         if (Main.star.contains(itemName)) {
             mythicFound(item, itemName, false);
+            return;
+        }
+        for(Pattern pattern : Main.regexStar) {
+            Matcher matcher = pattern.matcher(itemName);
+            if(matcher.matches()) {
+                mythicFound(item, itemName, false);
+                return;
+            }
         }
     }
 
