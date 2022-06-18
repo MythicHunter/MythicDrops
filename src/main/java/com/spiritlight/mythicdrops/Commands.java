@@ -32,7 +32,6 @@ public class Commands extends CommandBase {
         if(args.length == 0) {
             nullSafeMessage.sendMessage("/mythic toggle - Toggle alerts");
             nullSafeMessage.sendMessage("/mythic autotrack - Toggle autotrack");
-            nullSafeMessage.sendMessage("/mythic fullscan - More thorough scan");
             return;
         }
         switch(args[0].toLowerCase(Locale.ROOT)) {
@@ -47,10 +46,6 @@ public class Commands extends CommandBase {
             case "reload":
                 nullSafeMessage.sendMessage("Reloaded items!");
                 DetectMythics.previouslyDisabled = true;
-                break;
-            case "fullscan":
-                Main.fullScan = !Main.fullScan;
-                nullSafeMessage.sendMessage("Toggled fullscan! Fullscan active: " + Main.fullScan);
                 break;
             case "dump":
                 System.out.println(DetectMythics.scannedUUID);

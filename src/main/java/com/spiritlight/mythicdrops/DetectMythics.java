@@ -30,52 +30,23 @@ public class DetectMythics {
                 previouslyDisabled = true;
                 return;
             }
-            if(!Main.fullScan) {
-                if (!(event.getEntity() instanceof EntityItem)) return;
-                final UUID entityUUID = event.getEntity().getUniqueID();
-                if (scannedUUID.containsKey(entityUUID) && scannedUUID.get(entityUUID).equals(event.getEntity().serializeNBT()))
-                    return;
-                final EntityItem item = (EntityItem) event.getEntity();
-                if (item.getName().equals("item.tile.air")) return;
+            List<Entity> worldEntity = new ArrayList<>(Minecraft.getMinecraft().world.getLoadedEntityList());
+            for (Entity e : worldEntity) {
+                if (!(e instanceof EntityItem)) continue;
+                if (e.isGlowing()) continue;
+                if (scannedUUID.containsKey(e.getUniqueID()) && scannedUUID.get(e.getUniqueID()).equals(e.serializeNBT()))
+                    continue;
                 if (Main.debug) {
-                    nullSafeMessage.sendMessage(new TextComponentString("Found item of " + item.getName()).setStyle(
+                    nullSafeMessage.sendMessage(new TextComponentString("Found item of " + e.getName()).setStyle(
                             new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                    new TextComponentString(format("Item name: " + (item.hasCustomName() ? item.getCustomNameTag() + "(" + item.getName() + ")" : item.getName()) + "\n" + "Item UUID: " + item.getUniqueID() + "\n\n" + item.serializeNBT() + "\n\nClick to track!")))
+                                    new TextComponentString(format("Item name: " + (e.hasCustomName() ? e.getCustomNameTag() + "(" + e.getName() + ")" : e.getName()) + "\n" + "Item UUID: " + e.getUniqueID() + "\n\n" + e.serializeNBT() + "\n\nClick to track!")))
                             ).setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/compass " +
-                                    item.getPosition().getX() + " " + item.getPosition().getY() + " " + item.getPosition().getZ()))));
+                                    e.getPosition().getX() + " " + e.getPosition().getY() + " " + e.getPosition().getZ()))));
                 }
-                if (previouslyDisabled) {
-                    scannedUUID.clear();
-                    List<Entity> worldEntity = new ArrayList<>(Minecraft.getMinecraft().world.getLoadedEntityList());
-                    for (Entity e : worldEntity) {
-                        if (!(e instanceof EntityItem)) continue;
-                        checkItem((EntityItem) e);
-                        scannedUUID.put(e.getUniqueID(), e.serializeNBT());
-                    }
-                    previouslyDisabled = false;
-                    return;
-                }
-                checkItem(item);
-                scannedUUID.put(item.getUniqueID(), item.serializeNBT());
-            } else {
-                List<Entity> worldEntity = new ArrayList<>(Minecraft.getMinecraft().world.getLoadedEntityList());
-                for (Entity e : worldEntity) {
-                    if (!(e instanceof EntityItem)) continue;
-                    if(e.isGlowing()) continue;
-                    if (scannedUUID.containsKey(e.getUniqueID()) && scannedUUID.get(e.getUniqueID()).equals(e.serializeNBT())) continue;
-                    if (Main.debug) {
-                        nullSafeMessage.sendMessage(new TextComponentString("Found item of " + e.getName()).setStyle(
-                                new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                        new TextComponentString(format("Item name: " + (e.hasCustomName() ? e.getCustomNameTag() + "(" + e.getName() + ")" : e.getName()) + "\n" + "Item UUID: " + e.getUniqueID() + "\n\n" + e.serializeNBT() + "\n\nClick to track!")))
-                                ).setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/compass " +
-                                        e.getPosition().getX() + " " + e.getPosition().getY() + " " + e.getPosition().getZ()))));
-                    }
-                    checkItem((EntityItem) e);
-                    scannedUUID.put(e.getUniqueID(), e.serializeNBT());
-                }
+                checkItem((EntityItem) e);
+                scannedUUID.put(e.getUniqueID(), e.serializeNBT());
             }
-        } catch (NullPointerException ignored) {
-        }
+        } catch (NullPointerException ignored) {}
     }
 
     private void checkItem(EntityItem item) {
@@ -89,7 +60,7 @@ public class DetectMythics {
         }
     }
 
-    private String format(String s) {
+    private @NotNull String format(String s) {
         return s
                 .replaceAll("\\{",TextFormatting.AQUA + "{" + TextFormatting.GOLD)
                 .replaceAll("}",TextFormatting.AQUA + "}" + TextFormatting.GOLD)
