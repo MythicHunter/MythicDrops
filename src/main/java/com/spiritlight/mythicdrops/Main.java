@@ -23,7 +23,6 @@ public class Main
     static boolean debug = false;
     static Set<String> mythic = new HashSet<>();
     static Set<String> star = new HashSet<>();
-    static boolean fullScan = false;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
