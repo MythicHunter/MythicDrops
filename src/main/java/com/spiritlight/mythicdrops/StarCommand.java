@@ -79,7 +79,7 @@ public class StarCommand extends CommandBase {
             case "listregex":
                 nullSafeMessage.sendMessage("Starred items (RegEx) to log:");
                 for(Pattern s : Main.regexStar) {
-                    nullSafeMessage.sendMessage("- " + s.toString());
+                    nullSafeMessage.sendMessage("- " + s.pattern());
                 }
                 break;
             case "addregex":

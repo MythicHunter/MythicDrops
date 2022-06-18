@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class ConfigSpirit {
     public static void read() throws IOException {
@@ -18,6 +20,14 @@ public class ConfigSpirit {
             JsonObject jsonObject = (JsonObject)parser.parse(new FileReader("config/MythicDrops.json"));
             for (JsonElement element : jsonObject.getAsJsonArray("stars")) {
                 Main.star.add(element.getAsString());
+            }
+            for (JsonElement element : jsonObject.getAsJsonArray("regexStars")) {
+                try {
+                    Main.regexStar.add(Pattern.compile(element.getAsString()));
+                } catch (PatternSyntaxException ex) {
+                    System.out.println("Error caught trying to add pattern " + element.getAsString() + "! Ignoring it...");
+                    ex.printStackTrace();
+                }
             }
         } else {
             write();
@@ -31,6 +41,12 @@ public class ConfigSpirit {
         writer.beginArray();
         for (String name : Main.star) {
             writer.value(name);
+        }
+        writer.endArray();
+        writer.name("regex");
+        writer.beginArray();
+        for (Pattern pattern : Main.regexStar) {
+            writer.value(pattern.pattern());
         }
         writer.endArray();
         writer.endObject();
