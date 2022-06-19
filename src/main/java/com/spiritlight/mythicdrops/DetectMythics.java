@@ -42,13 +42,8 @@ public class DetectMythics {
                 for (Entity e : worldEntity) {
                     if (!(e instanceof EntityItem)) continue;
                     if (e.isGlowing()) continue;
-                    NBTTagCompound modifiedNBT = e.serializeNBT();
-                    modifiedNBT.removeTag("Age");
-                    modifiedNBT.removeTag("Fire");
-                    modifiedNBT.removeTag("FallDistance");
-                    modifiedNBT.removeTag("Motion");
-                    modifiedNBT.removeTag("Pos");
-                    if (UUIDMap.containsKey(e.getUniqueID()) && UUIDMap.get(e.getUniqueID()).equals(modifiedNBT))
+                    if(e.getName().contains("NPC")) continue;
+                    if (UUIDMap.containsKey(e.getUniqueID()) && UUIDMap.get(e.getUniqueID()).equals(e.serializeNBT()))
                         continue;
                     if (Main.debug) {
                         nullSafeMessage.sendMessage(new TextComponentString("Found item of " + e.getName()).setStyle(
@@ -58,7 +53,7 @@ public class DetectMythics {
                                         e.getPosition().getX() + " " + e.getPosition().getY() + " " + e.getPosition().getZ()))));
                     }
                     checkItem((EntityItem) e);
-                    scannedUUID.put(e.getUniqueID(), modifiedNBT);
+                    scannedUUID.put(e.getUniqueID(), e.serializeNBT());
                 }
                 s.off();
             }).exceptionally(e -> {

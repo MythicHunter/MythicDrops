@@ -15,9 +15,7 @@ import net.minecraft.util.text.event.HoverEvent;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -92,7 +90,7 @@ public class StarRegexCommand extends CommandBase {
                 args2 = Arrays.copyOfRange(args, 1, args.length);
                 name = String.join(" ", args2);
                 try {
-                    boolean b=remove(name);
+                    boolean b=Main.regexStar.removeIf(v -> v.pattern().equals(name));
                     nullSafeMessage.sendMessage(b ? "Removed " + name + " from regex star list." : "This pattern does not exist.");
                     save();
                 }  catch (PatternSyntaxException ex) {
@@ -132,14 +130,5 @@ public class StarRegexCommand extends CommandBase {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static boolean remove(String s) {
-        final Set<Pattern> patterns = new HashSet<>(Main.regexStar);
-        for(Pattern p : patterns) {
-            if(p.toString().equals(s))
-                return Main.regexStar.remove(p);
-        }
-        return false;
     }
 }
