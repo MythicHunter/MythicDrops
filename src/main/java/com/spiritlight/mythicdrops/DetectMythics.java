@@ -33,6 +33,8 @@ public class DetectMythics {
                 return;
             if (s.check())
                 return;
+            if (Minecraft.getMinecraft().world == null)
+                return;
             CompletableFuture.runAsync(() -> {
                 s.on();
                 final List<Entity> worldEntity = Collections.unmodifiableList(Minecraft.getMinecraft().world.getLoadedEntityList());
