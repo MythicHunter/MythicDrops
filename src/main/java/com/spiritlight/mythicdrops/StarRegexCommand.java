@@ -15,6 +15,8 @@ import net.minecraft.util.text.event.HoverEvent;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,7 +31,7 @@ public class StarRegexCommand extends CommandBase {
 
     @Override
     public String getName() {
-        return "starregex";
+        return "pattern";
     }
 
     @Override
@@ -40,9 +42,9 @@ public class StarRegexCommand extends CommandBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if(args.length == 0) {
-            nullSafeMessage.sendMessage("/starregex add/remove <Item Name>");
-            nullSafeMessage.sendMessage("/starregex list");
-            nullSafeMessage.sendMessage("/starregex test <text>");
+            nullSafeMessage.sendMessage("/pattern add/remove <Item Name>");
+            nullSafeMessage.sendMessage("/pattern list");
+            nullSafeMessage.sendMessage("/pattern test <text>");
             nullSafeMessage.sendMessage("Go to https://regexr.com/ to build a custom RegEx.");
             return;
         }
@@ -55,7 +57,7 @@ public class StarRegexCommand extends CommandBase {
                 for(Pattern s : Main.regexStar) {
                     TextComponentString string = new TextComponentString("- " + s.pattern());
                     string.setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to remove!")))
-                            .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/starregex remove " + s)));
+                            .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pattern remove " + s)));
                     nullSafeMessage.sendMessage(string);
                 }
                 break;
@@ -72,7 +74,12 @@ public class StarRegexCommand extends CommandBase {
                 name = String.join(" ", args2);
                 pattern = Pattern.compile(name);
                 try {
-                    boolean b=Main.regexStar.add(pattern);
+                    boolean b;
+                    if(Main.regexStar.contains(pattern)) {
+                        b = false;
+                    } else {
+                        b = Main.regexStar.add(pattern);
+                    }
                     nullSafeMessage.sendMessage(b ? "Added " + name + " to regex star list." : "This pattern already exists.");
                     save();
                 }  catch (PatternSyntaxException ex) {
@@ -111,7 +118,7 @@ public class StarRegexCommand extends CommandBase {
                 nullSafeMessage.sendMessage("Testing " + TextFormatting.GREEN + name + TextFormatting.RESET + " with " + Main.regexStar.size() + " patterns.");
                 for(Pattern p : Main.regexStar) {
                     Matcher matcher = p.matcher(name);
-                    if(matcher.matches()) {
+                    if(matcher.find()) {
                         nullSafeMessage.sendMessage("Pattern " + p.pattern() + " matches " + name + ".");
                         matched = true;
                     }
@@ -130,5 +137,9 @@ public class StarRegexCommand extends CommandBase {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<String> getAliases() {
+        return Arrays.asList("starregex", "regexstar");
     }
 }

@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 @ParametersAreNonnullByDefault
 public class DetectMythics {
     static final Map<UUID, NBTTagCompound> scannedUUID = new HashMap<>();
-    private static final status s = new status((byte)0);
+    private static final status s = new status();
 
     @SubscribeEvent
     public void itemEvent(final EntityEvent event) {
@@ -69,21 +69,21 @@ public class DetectMythics {
         String itemName = nbt.getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Name");
         // Prevent CoModExc
         final Set<String> mythic2 = new HashSet<>(Main.mythic);
-        final Set<String> star2 = new HashSet<>(Main.star);
-        final Set<Pattern> regexStar2 = new HashSet<>(Main.regexStar);
         if (mythic2.contains(itemName)) {
             mythicFound(item, itemName, true);
             return;
         }
+        final Set<String> star2 = new HashSet<>(Main.star);
         if(!star2.isEmpty())
         if (star2.contains(itemName)) {
             mythicFound(item, itemName, false);
             return;
         }
+        final Set<Pattern> regexStar2 = new HashSet<>(Main.regexStar);
         if(!regexStar2.isEmpty()) // This causes insane lag js
         for(Pattern pattern : regexStar2) {
             Matcher matcher = pattern.matcher(itemName);
-            if(matcher.matches()) {
+            if(matcher.find()) {
                 mythicFound(item, itemName, false);
                 return;
             }

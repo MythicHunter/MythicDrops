@@ -37,6 +37,7 @@ public class StarCommand extends CommandBase {
         if(args.length == 0) {
             nullSafeMessage.sendMessage("/star add/remove <Item Name>");
             nullSafeMessage.sendMessage("/star list");
+            nullSafeMessage.sendMessage("Looking for regex? Try /pattern");
             return;
         }
         String[] args2;

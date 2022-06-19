@@ -32,6 +32,7 @@ public class Commands extends CommandBase {
         if(args.length == 0) {
             nullSafeMessage.sendMessage("/mythic toggle - Toggle alerts");
             nullSafeMessage.sendMessage("/mythic autotrack - Toggle autotrack");
+            nullSafeMessage.sendMessage("Also see: /star, /pattern");
             return;
         }
         switch(args[0].toLowerCase(Locale.ROOT)) {
@@ -45,6 +46,7 @@ public class Commands extends CommandBase {
                 break;
             case "reload":
                 nullSafeMessage.sendMessage("Reloaded items!");
+                DetectMythics.scannedUUID.clear();
                 break;
             case "dump":
                 System.out.println(DetectMythics.scannedUUID);

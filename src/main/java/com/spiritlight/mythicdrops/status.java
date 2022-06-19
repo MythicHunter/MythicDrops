@@ -1,21 +1,20 @@
 package com.spiritlight.mythicdrops;
 
 public class status {
-    private byte b;
+    private boolean b;
 
-    public status(byte b) {
-        this.b = b;
+    public status() {
     }
 
     public void on() {
-        this.b = 1;
+        this.b = true;
     }
 
     public void off() {
-        this.b = 0;
+        this.b = false;
     }
 
     public boolean check() {
-        return (b==(byte)1);
+        return b;
     }
 }
