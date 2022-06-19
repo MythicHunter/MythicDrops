@@ -37,7 +37,7 @@ public class DetectMythics {
                 return;
             CompletableFuture.runAsync(() -> {
                 s.on();
-                final List<Entity> worldEntity = Collections.unmodifiableList(Minecraft.getMinecraft().world.getLoadedEntityList());
+                final List<Entity> worldEntity = new ArrayList<>(Minecraft.getMinecraft().world.getLoadedEntityList());
                 final Map<UUID, NBTTagCompound> UUIDMap = new HashMap<>(scannedUUID);
                 for (Entity e : worldEntity) {
                     if (!(e instanceof EntityItem)) continue;
