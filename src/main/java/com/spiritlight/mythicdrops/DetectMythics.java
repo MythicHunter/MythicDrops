@@ -35,22 +35,30 @@ public class DetectMythics {
                 return;
             CompletableFuture.runAsync(() -> {
                 s.on();
-            final List<Entity> worldEntity = Collections.unmodifiableList(Minecraft.getMinecraft().world.getLoadedEntityList());
-            for (Entity e : worldEntity) {
-                if (!(e instanceof EntityItem)) continue;
-                if (e.isGlowing()) continue;
-                if (scannedUUID.containsKey(e.getUniqueID()) && scannedUUID.get(e.getUniqueID()).equals(e.serializeNBT()))
-                    continue;
-                if (Main.debug) {
-                    nullSafeMessage.sendMessage(new TextComponentString("Found item of " + e.getName()).setStyle(
-                            new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                    new TextComponentString(format("Item name: " + (e.hasCustomName() ? e.getCustomNameTag() + "(" + e.getName() + ")" : e.getName()) + "\n" + "Item UUID: " + e.getUniqueID() + "\n\n" + e.serializeNBT() + "\n\nClick to track!")))
-                            ).setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/compass " +
-                                    e.getPosition().getX() + " " + e.getPosition().getY() + " " + e.getPosition().getZ()))));
+                final List<Entity> worldEntity = Collections.unmodifiableList(Minecraft.getMinecraft().world.getLoadedEntityList());
+                final Map<UUID, NBTTagCompound> UUIDMap = new HashMap<>(scannedUUID);
+                for (Entity e : worldEntity) {
+                    if (!(e instanceof EntityItem)) continue;
+                    if (e.isGlowing()) continue;
+                    NBTTagCompound modifiedNBT = e.serializeNBT();
+                    modifiedNBT.removeTag("Age");
+                    modifiedNBT.removeTag("Fire");
+                    modifiedNBT.removeTag("FallDistance");
+                    modifiedNBT.removeTag("Motion");
+                    modifiedNBT.removeTag("Pos");
+                    if (UUIDMap.containsKey(e.getUniqueID()) && UUIDMap.get(e.getUniqueID()).equals(modifiedNBT))
+                        continue;
+                    if (Main.debug) {
+                        nullSafeMessage.sendMessage(new TextComponentString("Found item of " + e.getName()).setStyle(
+                                new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                        new TextComponentString(format("Item name: " + (e.hasCustomName() ? e.getCustomNameTag() + "(" + e.getName() + ")" : e.getName()) + "\n" + "Item UUID: " + e.getUniqueID() + "\n\n" + e.serializeNBT() + "\n\nClick to track!")))
+                                ).setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/compass " +
+                                        e.getPosition().getX() + " " + e.getPosition().getY() + " " + e.getPosition().getZ()))));
+                    }
+                    checkItem((EntityItem) e);
+                    scannedUUID.put(e.getUniqueID(), modifiedNBT);
                 }
-                checkItem((EntityItem) e);
-                scannedUUID.put(e.getUniqueID(), e.serializeNBT());
-            }
+                s.off();
             }).exceptionally(e -> {
                 s.off();
                 e.printStackTrace();
@@ -59,20 +67,24 @@ public class DetectMythics {
         } catch (NullPointerException ignored) {}
     }
 
-    private void checkItem(EntityItem item) {
+    private void checkItem(final EntityItem item) {
         NBTTagCompound nbt = item.serializeNBT();
         String itemName = nbt.getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Name");
-        if (Main.mythic.contains(itemName)) {
+        // Prevent CoModExc
+        final Set<String> mythic2 = new HashSet<>(Main.mythic);
+        final Set<String> star2 = new HashSet<>(Main.star);
+        final Set<Pattern> regexStar2 = new HashSet<>(Main.regexStar);
+        if (mythic2.contains(itemName)) {
             mythicFound(item, itemName, true);
             return;
         }
-        if(!Main.star.isEmpty())
-        if (Main.star.contains(itemName)) {
+        if(!star2.isEmpty())
+        if (star2.contains(itemName)) {
             mythicFound(item, itemName, false);
             return;
         }
-        if(!Main.regexStar.isEmpty()) // This causes insane lag js
-        for(Pattern pattern : Main.regexStar) {
+        if(!regexStar2.isEmpty()) // This causes insane lag js
+        for(Pattern pattern : regexStar2) {
             Matcher matcher = pattern.matcher(itemName);
             if(matcher.matches()) {
                 mythicFound(item, itemName, false);
@@ -93,7 +105,7 @@ public class DetectMythics {
                 .replaceAll("\"", TextFormatting.GREEN + "\"" + TextFormatting.GOLD);
     }
 
-    private void mythicFound(@NotNull EntityItem item, String itemName, boolean isMythic) {
+    private void mythicFound(@NotNull final EntityItem item, String itemName, boolean isMythic) {
         item.setGlowing(true);
         Minecraft.getMinecraft().player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, 1f, 1f);
         TextComponentString tMythic = new TextComponentString(

@@ -33,6 +33,7 @@ public class Main
         MinecraftForge.EVENT_BUS.register(new DetectMythics());
         ClientCommandHandler.instance.registerCommand(new Commands());
         ClientCommandHandler.instance.registerCommand(new StarCommand());
+        ClientCommandHandler.instance.registerCommand(new StarRegexCommand());
         try {
             ConfigSpirit.read();
         } catch (IOException ex) {

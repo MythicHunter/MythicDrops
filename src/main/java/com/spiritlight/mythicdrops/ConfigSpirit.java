@@ -21,7 +21,7 @@ public class ConfigSpirit {
             for (JsonElement element : jsonObject.getAsJsonArray("stars")) {
                 Main.star.add(element.getAsString());
             }
-            for (JsonElement element : jsonObject.getAsJsonArray("regexStars")) {
+            for (JsonElement element : jsonObject.getAsJsonArray("regex")) {
                 try {
                     Main.regexStar.add(Pattern.compile(element.getAsString()));
                 } catch (PatternSyntaxException ex) {

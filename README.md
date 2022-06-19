@@ -10,7 +10,7 @@ All commands are case-insensitive.
 - /star <add/remove/list> [args...] - Adds custom names
 
 Star also allows regex, commands:
-- /star addregex/removeregex/listregex
+- /starregex <add/remove/list/test> [args...]
 
 
 ## Building
