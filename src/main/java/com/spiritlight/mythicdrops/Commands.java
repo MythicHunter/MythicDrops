@@ -45,7 +45,6 @@ public class Commands extends CommandBase {
                 break;
             case "reload":
                 nullSafeMessage.sendMessage("Reloaded items!");
-                DetectMythics.previouslyDisabled = true;
                 break;
             case "dump":
                 System.out.println(DetectMythics.scannedUUID);

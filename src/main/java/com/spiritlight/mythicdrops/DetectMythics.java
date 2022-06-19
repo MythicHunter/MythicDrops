@@ -17,22 +17,25 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ParametersAreNonnullByDefault
 public class DetectMythics {
-    static boolean previouslyDisabled = false;
     static Map<UUID, NBTTagCompound> scannedUUID = new HashMap<>();
+    private static final status s = new status((byte)0);
 
     @SubscribeEvent
     public void itemEvent(final EntityEvent event) {
         try {
-            if (!Main.enabled) {
-                previouslyDisabled = true;
+            if (!Main.enabled)
                 return;
-            }
-            List<Entity> worldEntity = new ArrayList<>(Minecraft.getMinecraft().world.getLoadedEntityList());
+            if (s.check())
+                return;
+            CompletableFuture.runAsync(() -> {
+                s.on();
+            final List<Entity> worldEntity = Collections.unmodifiableList(Minecraft.getMinecraft().world.getLoadedEntityList());
             for (Entity e : worldEntity) {
                 if (!(e instanceof EntityItem)) continue;
                 if (e.isGlowing()) continue;
@@ -48,6 +51,11 @@ public class DetectMythics {
                 checkItem((EntityItem) e);
                 scannedUUID.put(e.getUniqueID(), e.serializeNBT());
             }
+            }).exceptionally(e -> {
+                s.off();
+                e.printStackTrace();
+                return null;
+            }).thenAccept(x -> s.off());
         } catch (NullPointerException ignored) {}
     }
 
@@ -58,10 +66,12 @@ public class DetectMythics {
             mythicFound(item, itemName, true);
             return;
         }
+        if(!Main.star.isEmpty())
         if (Main.star.contains(itemName)) {
             mythicFound(item, itemName, false);
             return;
         }
+        if(!Main.regexStar.isEmpty()) // This causes insane lag js
         for(Pattern pattern : Main.regexStar) {
             Matcher matcher = pattern.matcher(itemName);
             if(matcher.matches()) {
