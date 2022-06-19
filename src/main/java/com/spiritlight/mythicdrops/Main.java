@@ -23,8 +23,8 @@ public class Main
     static boolean enabled = true;
     static boolean debug = false;
     static Set<String> mythic = new HashSet<>();
-    static Set<String> star = new HashSet<>();
-    static Set<Pattern> regexStar = new HashSet<>();
+    static final Set<String> star = new HashSet<>();
+    static final Set<Pattern> regexStar = new HashSet<>();
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)

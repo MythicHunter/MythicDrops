@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 @ParametersAreNonnullByDefault
 public class DetectMythics {
-    static Map<UUID, NBTTagCompound> scannedUUID = new HashMap<>();
+    static final Map<UUID, NBTTagCompound> scannedUUID = new HashMap<>();
     private static final status s = new status((byte)0);
 
     @SubscribeEvent

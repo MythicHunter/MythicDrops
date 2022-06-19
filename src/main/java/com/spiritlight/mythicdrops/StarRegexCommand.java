@@ -47,14 +47,13 @@ public class StarRegexCommand extends CommandBase {
         }
         String[] args2;
         String name;
-        Pattern p;
         switch(args[0].toLowerCase(Locale.ROOT)) {
             case "list":
                 nullSafeMessage.sendMessage("Starred items (RegEx) to log:");
                 for(Pattern s : Main.regexStar) {
                     TextComponentString string = new TextComponentString("- " + s.pattern());
                     string.setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to remove!")))
-                            .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/star remove " + s.pattern())));
+                            .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/starregex remove " + s.pattern())));
                     nullSafeMessage.sendMessage(string);
                 }
                 break;
@@ -66,16 +65,15 @@ public class StarRegexCommand extends CommandBase {
                 args2 = Arrays.copyOfRange(args, 1, args.length);
                 name = String.join(" ", args2);
                 try {
-                    p = Pattern.compile(name);
+                    Main.regexStar.add(Pattern.compile(name));
+                    nullSafeMessage.sendMessage("Added " + name + " to regex star list.");
+                    save();
                 }  catch (PatternSyntaxException ex) {
                     ITextComponent s = new TextComponentString("The provided RegEx is invalid. Check https://regexr.com/ for RegEx (Hover for cause..)")
                             .setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(ex.getMessage()))));
                     nullSafeMessage.sendMessage(s);
                     return;
                 }
-                Main.regexStar.add(p);
-                nullSafeMessage.sendMessage("Added " + name + " to regex star list.");
-                save();
                 break;
             case "remove":
                 if(args.length <= 1) {
@@ -85,16 +83,15 @@ public class StarRegexCommand extends CommandBase {
                 args2 = Arrays.copyOfRange(args, 1, args.length);
                 name = String.join(" ", args2);
                 try {
-                    p = Pattern.compile(name);
+                    Main.regexStar.remove(Pattern.compile(name));
+                    nullSafeMessage.sendMessage("Removed " + name + " from regex star list.");
+                    save();
                 }  catch (PatternSyntaxException ex) {
                     ITextComponent s = new TextComponentString("The provided RegEx is invalid. Check https://regexr.com/ for RegEx (Hover for cause..)")
                             .setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(ex.getMessage()))));
                     nullSafeMessage.sendMessage(s);
                     return;
                 }
-                Main.regexStar.remove(p);
-                nullSafeMessage.sendMessage("Removed " + name + " from regex star list.");
-                save();
                 break;
             case "test":
                 if(args.length == 1) {
