@@ -12,6 +12,11 @@ All commands are case-insensitive.
 Star also allows regex, commands:
 - /pattern <add/remove/list/test> [args...]
 
+## API Calls
+
+This mod by default, on startup, calls the API exactly once per launch (api.wynncraft.com)
+
+You may make additional calls to update by /mythic reload
 
 ## Building
 

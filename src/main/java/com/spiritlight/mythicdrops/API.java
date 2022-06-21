@@ -1,8 +1,6 @@
 package com.spiritlight.mythicdrops;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.*;
 
 import java.util.*;
 
@@ -12,15 +10,17 @@ public class API {
         Set<String> mythicList = new HashSet<>();
         System.out.println("Collecting mythic names...");
         try {
-            JSONObject json = new JSONObject(HTTP.get("https://api.wynncraft.com/public_api.php?action=itemDB&category=all"));
-            JSONArray arr = json.getJSONArray("items");
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject o = arr.getJSONObject(i);
-                if (o.getString("tier").equals("Mythic")) {
-                    mythicList.add(o.getString("name"));
+            JsonParser parser = new JsonParser();
+            JsonElement json = parser.parse(HTTP.get("https://api.wynncraft.com/public_api.php?action=itemDB&category=all"));
+            JsonArray arr = json.getAsJsonObject().getAsJsonArray("items");
+            for (JsonElement element : arr) {
+                String tier = element.getAsJsonObject().get("tier").getAsString();
+                if (tier.equals("Mythic")) {
+                    mythicList.add(element.getAsJsonObject().get("name").getAsString());
                 }
+                Main.itemList.add(element.getAsJsonObject().get("name").getAsString());
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         Main.mythic = new HashSet<>(mythicList);

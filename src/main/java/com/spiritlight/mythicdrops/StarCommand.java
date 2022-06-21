@@ -5,15 +5,16 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Locale;
+import java.util.*;
 
 @ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
 public class StarCommand extends CommandBase {
@@ -61,7 +62,7 @@ public class StarCommand extends CommandBase {
                 name = String.join(" ", args2);
                 Main.star.add(name);
                 nullSafeMessage.sendMessage("Added " + name + " to star list.");
-                save();
+                ConfigSpirit.save();
                 break;
             case "remove":
                 if(args.length <= 1) {
@@ -72,7 +73,7 @@ public class StarCommand extends CommandBase {
                 name = String.join(" ", args2);
                 Main.star.remove(name);
                 nullSafeMessage.sendMessage("Removed " + name + " from star list.");
-                save();
+                ConfigSpirit.save();
                 break;
             default:
                 nullSafeMessage.sendMessage("Invalid command. try /" + getName());
@@ -80,11 +81,35 @@ public class StarCommand extends CommandBase {
         }
     }
 
-    private static void save() {
-        try {
-            ConfigSpirit.write();
-        } catch (IOException e) {
-            e.printStackTrace();
+    @Override
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
+        if(args.length == 0) {
+            return Arrays.asList("list", "add", "remove");
+        }
+        List<String> value = new ArrayList<>();
+        switch (args[0]) {
+            case "add":
+                if(args.length == 2) {
+                    for(String name : Main.itemList) {
+                        if(name.startsWith(args[1])) {
+                            value.add(name);
+                        }
+                    }
+                    return value;
+                } else return Main.itemList;
+            case "remove":
+                if(args.length == 2) {
+                    for(String name : Main.star) {
+                        if(name.startsWith(args[1])) {
+                            value.add(name);
+                        }
+                    }
+                } else {
+                    value = new ArrayList<>(Main.star);
+                }
+                return value;
+            default:
+                return Collections.emptyList();
         }
     }
 }

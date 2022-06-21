@@ -18,32 +18,44 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ParametersAreNonnullByDefault
 public class DetectMythics {
-    static final Map<UUID, NBTTagCompound> scannedUUID = new HashMap<>();
+    static final Map<UUID, NBTTagCompound> scannedUUID = new ConcurrentHashMap<>();
     private static final status s = new status();
 
     @SubscribeEvent
     public void itemEvent(final EntityEvent event) {
+        if (!Main.enabled)
+            return;
+        if (s.check())
+            return;
+        if (Minecraft.getMinecraft().world == null)
+            return;
         try {
-            if (!Main.enabled)
-                return;
-            if (s.check())
-                return;
-            if (Minecraft.getMinecraft().world == null)
-                return;
             CompletableFuture.runAsync(() -> {
                 s.on();
                 final List<Entity> worldEntity = new ArrayList<>(Minecraft.getMinecraft().world.getLoadedEntityList());
-                final Map<UUID, NBTTagCompound> UUIDMap = new HashMap<>(scannedUUID);
+                boolean isIdentified = false;
                 for (Entity e : worldEntity) {
                     if (!(e instanceof EntityItem)) continue;
                     if (e.isGlowing()) continue;
                     if(e.getName().contains("NPC")) continue;
-                    if (UUIDMap.containsKey(e.getUniqueID()) && UUIDMap.get(e.getUniqueID()).equals(e.serializeNBT()))
+                    if(e.serializeNBT().getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Lore").contains("identifications")) {
+                        continue;
+                    }
+                    NBTTagCompound trimmedNBT = e.serializeNBT();
+                    trimmedNBT.removeTag("Age");
+                    trimmedNBT.removeTag("Motion");
+                    trimmedNBT.removeTag("Pos");
+                    trimmedNBT.removeTag("Fire");
+                    trimmedNBT.removeTag("FallDistance");
+                    trimmedNBT.removeTag("PickupDelay");
+                    trimmedNBT.removeTag("OnGround");
+                    if (scannedUUID.containsKey(e.getUniqueID()) && scannedUUID.get(e.getUniqueID()).equals(trimmedNBT))
                         continue;
                     if (Main.debug) {
                         nullSafeMessage.sendMessage(new TextComponentString("Found item of " + e.getName()).setStyle(
@@ -53,7 +65,7 @@ public class DetectMythics {
                                         e.getPosition().getX() + " " + e.getPosition().getY() + " " + e.getPosition().getZ()))));
                     }
                     checkItem((EntityItem) e);
-                    scannedUUID.put(e.getUniqueID(), e.serializeNBT());
+                    scannedUUID.put(e.getUniqueID(), trimmedNBT);
                 }
                 s.off();
             }).exceptionally(e -> {

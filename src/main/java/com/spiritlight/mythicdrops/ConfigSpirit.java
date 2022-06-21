@@ -29,6 +29,7 @@ public class ConfigSpirit {
                     ex.printStackTrace();
                 }
             }
+            Main.unidOnly = jsonObject.get("unidOnly").getAsBoolean();
         } else {
             write();
         }
@@ -49,7 +50,18 @@ public class ConfigSpirit {
             writer.value(pattern.pattern());
         }
         writer.endArray();
+        writer.name("unidOnly").value(Main.unidOnly);
         writer.endObject();
         writer.close();
+    }
+
+    public static boolean save() {
+        try {
+            write();
+            return true;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
 }

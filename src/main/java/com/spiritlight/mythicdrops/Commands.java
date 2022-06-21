@@ -44,9 +44,10 @@ public class Commands extends CommandBase {
                 Main.autoTrack = !Main.autoTrack;
                 nullSafeMessage.sendMessage("Toggled autotrack! Track active: " + Main.autoTrack);
                 break;
-            case "reload":
-                nullSafeMessage.sendMessage("Reloaded items!");
-                DetectMythics.scannedUUID.clear();
+            case "unid":
+                Main.unidOnly = !Main.unidOnly;
+                nullSafeMessage.sendMessage("Toggled criteria! Track identified too: " + Main.unidOnly);
+                ConfigSpirit.save();
                 break;
             case "dump":
                 System.out.println(DetectMythics.scannedUUID);
@@ -55,7 +56,7 @@ public class Commands extends CommandBase {
                 Main.debug = !Main.debug;
                 nullSafeMessage.sendMessage("Toggled debug! debug active: " + Main.debug);
                 break;
-            case "reloadmythics":
+            case "reload":
                 nullSafeMessage.sendMessage("Reloading mythic db!");
                 CompletableFuture.runAsync(API::fetchItem).thenAccept(x -> nullSafeMessage.sendMessage("Successfully reloaded mythic db!"));
                 break;

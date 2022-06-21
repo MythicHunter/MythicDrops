@@ -8,7 +8,9 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -25,6 +27,8 @@ public class Main
     static Set<String> mythic = new HashSet<>();
     static final Set<String> star = new HashSet<>();
     static final Set<Pattern> regexStar = new HashSet<>();
+    static final List<String> itemList = new ArrayList<>();
+    static boolean unidOnly = false;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)

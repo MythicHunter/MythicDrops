@@ -5,6 +5,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
@@ -12,12 +13,10 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -81,7 +80,7 @@ public class StarRegexCommand extends CommandBase {
                         b = Main.regexStar.add(pattern);
                     }
                     nullSafeMessage.sendMessage(b ? "Added " + name + " to regex star list." : "This pattern already exists.");
-                    save();
+                    ConfigSpirit.save();
                 }  catch (PatternSyntaxException ex) {
                     ITextComponent s = new TextComponentString("The provided RegEx is invalid. Check https://regexr.com/ for RegEx (Hover for cause..)")
                             .setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(ex.getMessage()))));
@@ -99,7 +98,7 @@ public class StarRegexCommand extends CommandBase {
                 try {
                     boolean b=Main.regexStar.removeIf(v -> v.pattern().equals(name));
                     nullSafeMessage.sendMessage(b ? "Removed " + name + " from regex star list." : "This pattern does not exist.");
-                    save();
+                    ConfigSpirit.save();
                 }  catch (PatternSyntaxException ex) {
                     ITextComponent s = new TextComponentString("The provided RegEx is invalid. Check https://regexr.com/ for RegEx (Hover for cause..)")
                             .setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(ex.getMessage()))));
@@ -131,15 +130,30 @@ public class StarRegexCommand extends CommandBase {
         }
     }
 
-    private static void save() {
-        try {
-            ConfigSpirit.write();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public List<String> getAliases() {
         return Arrays.asList("starregex", "regexstar");
+    }
+
+    @Override
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
+        if(args.length == 0) {
+            return Arrays.asList("list", "add", "remove");
+        }
+        List<String> value = new ArrayList<>();
+        if ("remove".equals(args[0])) {
+            if (args.length == 2) {
+                for (Pattern pattern : Main.regexStar) {
+                    if (pattern.pattern().startsWith(args[1])) {
+                        value.add(pattern.pattern());
+                    }
+                }
+            } else {
+                for (Pattern pattern : Main.regexStar) {
+                    value.add(pattern.pattern());
+                }
+            }
+            return value;
+        }
+        return Collections.emptyList();
     }
 }
