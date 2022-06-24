@@ -13,23 +13,33 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class ConfigSpirit {
+    private static boolean antiLoop = false;
     public static void read() throws IOException {
         File config = new File("config/MythicDrops.json");
         if (config.exists()) {
-            JsonParser parser = new JsonParser();
-            JsonObject jsonObject = (JsonObject)parser.parse(new FileReader("config/MythicDrops.json"));
-            for (JsonElement element : jsonObject.getAsJsonArray("stars")) {
-                Main.star.add(element.getAsString());
-            }
-            for (JsonElement element : jsonObject.getAsJsonArray("regex")) {
-                try {
-                    Main.regexStar.add(Pattern.compile(element.getAsString()));
-                } catch (PatternSyntaxException ex) {
-                    System.out.println("Error caught trying to add pattern " + element.getAsString() + "! Ignoring it...");
-                    ex.printStackTrace();
+            try {
+                JsonParser parser = new JsonParser();
+                JsonObject jsonObject = (JsonObject) parser.parse(new FileReader("config/MythicDrops.json"));
+                for (JsonElement element : jsonObject.getAsJsonArray("stars")) {
+                    Main.star.add(element.getAsString());
                 }
+                for (JsonElement element : jsonObject.getAsJsonArray("regex")) {
+                    try {
+                        Main.regexStar.add(Pattern.compile(element.getAsString()));
+                    } catch (PatternSyntaxException ex) {
+                        System.out.println("Error caught trying to add pattern " + element.getAsString() + "! Ignoring it...");
+                        ex.printStackTrace();
+                    }
+                }
+                Main.unidOnly = jsonObject.get("unidOnly").getAsBoolean();
+                Main.leniency = jsonObject.get("leniency").getAsInt();
+            } catch (NullPointerException exception) {
+                System.out.println("New configuration files found?");
+                if(antiLoop) return;
+                antiLoop = true;
+                write();
+                read();
             }
-            Main.unidOnly = jsonObject.get("unidOnly").getAsBoolean();
         } else {
             write();
         }
@@ -51,6 +61,7 @@ public class ConfigSpirit {
         }
         writer.endArray();
         writer.name("unidOnly").value(Main.unidOnly);
+        writer.name("leniency").value(Main.leniency);
         writer.endObject();
         writer.close();
     }

@@ -39,14 +39,10 @@ public class DetectMythics {
             CompletableFuture.runAsync(() -> {
                 s.on();
                 final List<Entity> worldEntity = new ArrayList<>(Minecraft.getMinecraft().world.getLoadedEntityList());
-                boolean isIdentified = false;
                 for (Entity e : worldEntity) {
                     if (!(e instanceof EntityItem)) continue;
                     if (e.isGlowing()) continue;
                     if(e.getName().contains("NPC")) continue;
-                    if(e.serializeNBT().getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Lore").contains("identifications")) {
-                        continue;
-                    }
                     NBTTagCompound trimmedNBT = e.serializeNBT();
                     trimmedNBT.removeTag("Age");
                     trimmedNBT.removeTag("Motion");
@@ -79,24 +75,32 @@ public class DetectMythics {
     private void checkItem(final EntityItem item) {
         NBTTagCompound nbt = item.serializeNBT();
         String itemName = nbt.getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Name");
-        // Prevent CoModExc
-        final Set<String> mythic2 = new HashSet<>(Main.mythic);
+        boolean preIdentified = nbt.getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").toString().contains("identifications");
+        if(preIdentified && Main.unidOnly) return;
+        Set<String> mythic2 = new HashSet<>(Main.mythic);
+        boolean strictSearch = true;
         if (mythic2.contains(itemName)) {
-            mythicFound(item, itemName, true);
+            mythicFound(item, itemName, true, preIdentified);
             return;
         }
         final Set<String> star2 = new HashSet<>(Main.star);
+        if(Main.leniency % 2 == 1) {
+            itemName = itemName.toLowerCase(Locale.ROOT);
+        } else {
+            strictSearch = false;
+        }
         if(!star2.isEmpty())
-        if (star2.contains(itemName)) {
-            mythicFound(item, itemName, false);
+        if ((strictSearch ? star2.contains(itemName) : star2.stream().anyMatch(itemName::contains))) {
+            mythicFound(item, itemName, false, preIdentified);
             return;
         }
+        itemName = nbt.getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Name");
         final Set<Pattern> regexStar2 = new HashSet<>(Main.regexStar);
         if(!regexStar2.isEmpty()) // This causes insane lag js
         for(Pattern pattern : regexStar2) {
             Matcher matcher = pattern.matcher(itemName);
             if(matcher.find()) {
-                mythicFound(item, itemName, false);
+                mythicFound(item, itemName, false, preIdentified);
                 return;
             }
         }
@@ -114,17 +118,17 @@ public class DetectMythics {
                 .replaceAll("\"", TextFormatting.GREEN + "\"" + TextFormatting.GOLD);
     }
 
-    private void mythicFound(@NotNull final EntityItem item, String itemName, boolean isMythic) {
+    private void mythicFound(@NotNull final EntityItem item, String itemName, boolean isMythic, boolean preIdentified) {
         item.setGlowing(true);
         Minecraft.getMinecraft().player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, 1f, 1f);
         TextComponentString tMythic = new TextComponentString(
                 TextFormatting.LIGHT_PURPLE + "[" + TextFormatting.DARK_PURPLE + "!" + TextFormatting.LIGHT_PURPLE + "] " +
-                        TextFormatting.LIGHT_PURPLE + "Mythic Item " + TextFormatting.DARK_PURPLE + itemName + TextFormatting.LIGHT_PURPLE +
+                        TextFormatting.LIGHT_PURPLE + (preIdentified ? "Identified Mythic " : "Mythic Item Unidentified ") + TextFormatting.DARK_PURPLE + itemName + TextFormatting.LIGHT_PURPLE +
                         " has dropped at " + TextFormatting.AQUA + item.getPosition().getX() + ", " + item.getPosition().getY() + ", " + item.getPosition().getZ() + TextFormatting.YELLOW + "!"
         );
         TextComponentString tRegular = new TextComponentString(
                 TextFormatting.GOLD + "[" + TextFormatting.YELLOW + "!" + TextFormatting.GOLD + "] " +
-                        TextFormatting.GREEN + "Starred item " + TextFormatting.DARK_GREEN + itemName + TextFormatting.GREEN +
+                        TextFormatting.GREEN + (preIdentified ? "Identified starred item " : "Starred item Unidentified ") + TextFormatting.DARK_GREEN + itemName + TextFormatting.GREEN +
                         " has dropped at " + TextFormatting.AQUA + item.getPosition().getX() + ", " + item.getPosition().getY() + ", " + item.getPosition().getZ() + TextFormatting.YELLOW + "!"
         );
         Style style = (new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(TextFormatting.GOLD + "Click to track the location!")))

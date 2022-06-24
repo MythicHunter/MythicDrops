@@ -32,6 +32,8 @@ public class Commands extends CommandBase {
         if(args.length == 0) {
             nullSafeMessage.sendMessage("/mythic toggle - Toggle alerts");
             nullSafeMessage.sendMessage("/mythic autotrack - Toggle autotrack");
+            nullSafeMessage.sendMessage("/mythic unid - Toggle identification criteria");
+            nullSafeMessage.sendMessage("/mythic setLeniency - Toggle search criteria");
             nullSafeMessage.sendMessage("Also see: /star, /pattern");
             return;
         }
@@ -46,8 +48,33 @@ public class Commands extends CommandBase {
                 break;
             case "unid":
                 Main.unidOnly = !Main.unidOnly;
-                nullSafeMessage.sendMessage("Toggled criteria! Track identified too: " + Main.unidOnly);
+                nullSafeMessage.sendMessage("Toggled criteria! Only track unidentified items: " + Main.unidOnly);
                 ConfigSpirit.save();
+                break;
+            case "setleniency":
+                if(args.length == 1) {
+                    nullSafeMessage.sendMessage("Current leniency setting: " + Main.leniency);
+                    nullSafeMessage.sendMessage("Leniency levels are as following:");
+                    nullSafeMessage.sendMessage("Leniency 0: Strict match");
+                    nullSafeMessage.sendMessage("Leniency 1: Strict match on lower case");
+                    nullSafeMessage.sendMessage("Leniency 2: Any match");
+                    nullSafeMessage.sendMessage("Leniency 3: Any match on lower case");
+                    nullSafeMessage.sendMessage("Set leniency by /" + getName() + " setleniency <num>");
+                    nullSafeMessage.sendMessage("RegEx and mythic ignores leniency settings.");
+                } else try {
+                    int level = Integer.parseInt(args[1]);
+                    if(level < 0 || level > 3) {
+                        nullSafeMessage.sendMessage("Invalid leniency level " + level);
+                        return;
+                    }
+                    Main.leniency = level;
+                    nullSafeMessage.sendMessage("Successfully set leniency to " + level);
+                    ConfigSpirit.save();
+                    return;
+                } catch (NumberFormatException exception) {
+                    nullSafeMessage.sendMessage("Failed to parse your leniency level. Please use whole int");
+                    break;
+                }
                 break;
             case "dump":
                 System.out.println(DetectMythics.scannedUUID);

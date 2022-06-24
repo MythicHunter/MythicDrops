@@ -29,6 +29,7 @@ public class Main
     static final Set<Pattern> regexStar = new HashSet<>();
     static final List<String> itemList = new ArrayList<>();
     static boolean unidOnly = false;
+    static int leniency = 0;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -38,6 +39,7 @@ public class Main
         ClientCommandHandler.instance.registerCommand(new Commands());
         ClientCommandHandler.instance.registerCommand(new StarCommand());
         ClientCommandHandler.instance.registerCommand(new StarRegexCommand());
+        ClientCommandHandler.instance.registerCommand(new SayCommand());
         try {
             ConfigSpirit.read();
         } catch (IOException ex) {
