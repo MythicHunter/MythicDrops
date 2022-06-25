@@ -20,11 +20,14 @@ public class API {
                 }
                 Main.itemList.add(element.getAsJsonObject().get("name").getAsString());
             }
+            json = parser.parse(HTTP.get("https://api.wynncraft.com/v2/ingredient/list"));
+            for (JsonElement element : json.getAsJsonObject().getAsJsonArray("data")) {
+                Main.ingredientList.add(element.getAsString());
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         Main.mythic = new HashSet<>(mythicList);
     }
-
-
 }

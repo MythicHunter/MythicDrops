@@ -28,6 +28,7 @@ public class Main
     static final Set<String> star = new HashSet<>();
     static final Set<Pattern> regexStar = new HashSet<>();
     static final List<String> itemList = new ArrayList<>();
+    static final List<String> ingredientList = new ArrayList<>();
     static boolean unidOnly = false;
     static int leniency = 0;
 

@@ -56,7 +56,7 @@ public class DetectMythics {
                     if (Main.debug) {
                         nullSafeMessage.sendMessage(new TextComponentString("Found item of " + e.getName()).setStyle(
                                 new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                        new TextComponentString(format("Item name: " + (e.hasCustomName() ? e.getCustomNameTag() + "(" + e.getName() + ")" : e.getName()) + "\n" + "Item UUID: " + e.getUniqueID() + "\n\n" + e.serializeNBT() + "\n\nClick to track!")))
+                                        new TextComponentString(format("Wynncraft Item Name:" + e.serializeNBT().getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Name") + "\n\n" + "Item name: " + (e.hasCustomName() ? e.getCustomNameTag() + "(" + e.getName() + ")" : e.getName()) + "\n" + "Item UUID: " + e.getUniqueID() + "\n\n" + e.serializeNBT() + "\n\nClick to track!")))
                                 ).setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/compass " +
                                         e.getPosition().getX() + " " + e.getPosition().getY() + " " + e.getPosition().getZ()))));
                     }
@@ -66,6 +66,7 @@ public class DetectMythics {
                 s.off();
             }).exceptionally(e -> {
                 s.off();
+                nullSafeMessage.sendMessage("An error has occurred, please check logs.");
                 e.printStackTrace();
                 return null;
             }).thenAccept(x -> s.off());
@@ -80,19 +81,22 @@ public class DetectMythics {
         Set<String> mythic2 = new HashSet<>(Main.mythic);
         boolean strictSearch = true;
         if (mythic2.contains(itemName)) {
-            mythicFound(item, itemName, true, preIdentified);
+            itemFound(item, preIdentified);
             return;
         }
         final Set<String> star2 = new HashSet<>(Main.star);
         if(Main.leniency % 2 == 1) {
             itemName = itemName.toLowerCase(Locale.ROOT);
-        } else {
+        }
+        if(Main.leniency >= 2) {
             strictSearch = false;
         }
-        if(!star2.isEmpty())
-        if ((strictSearch ? star2.contains(itemName) : star2.stream().anyMatch(itemName::contains))) {
-            mythicFound(item, itemName, false, preIdentified);
-            return;
+        final String finalItemName = itemName;
+        if(!star2.isEmpty()) {
+            if ((strictSearch ? star2.contains(itemName) : star2.stream().anyMatch(i -> i.toLowerCase(Locale.ROOT).contains(finalItemName)))) {
+                itemFound(item, preIdentified);
+                return;
+            }
         }
         itemName = nbt.getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Name");
         final Set<Pattern> regexStar2 = new HashSet<>(Main.regexStar);
@@ -100,7 +104,7 @@ public class DetectMythics {
         for(Pattern pattern : regexStar2) {
             Matcher matcher = pattern.matcher(itemName);
             if(matcher.find()) {
-                mythicFound(item, itemName, false, preIdentified);
+                itemFound(item, preIdentified);
                 return;
             }
         }
@@ -118,22 +122,41 @@ public class DetectMythics {
                 .replaceAll("\"", TextFormatting.GREEN + "\"" + TextFormatting.GOLD);
     }
 
-    private void mythicFound(@NotNull final EntityItem item, String itemName, boolean isMythic, boolean preIdentified) {
+    private void itemFound(@NotNull final EntityItem item, boolean preIdentified) {
         item.setGlowing(true);
         Minecraft.getMinecraft().player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, 1f, 1f);
-        TextComponentString tMythic = new TextComponentString(
-                TextFormatting.LIGHT_PURPLE + "[" + TextFormatting.DARK_PURPLE + "!" + TextFormatting.LIGHT_PURPLE + "] " +
-                        TextFormatting.LIGHT_PURPLE + (preIdentified ? "Identified Mythic " : "Mythic Item Unidentified ") + TextFormatting.DARK_PURPLE + itemName + TextFormatting.LIGHT_PURPLE +
-                        " has dropped at " + TextFormatting.AQUA + item.getPosition().getX() + ", " + item.getPosition().getY() + ", " + item.getPosition().getZ() + TextFormatting.YELLOW + "!"
-        );
-        TextComponentString tRegular = new TextComponentString(
-                TextFormatting.GOLD + "[" + TextFormatting.YELLOW + "!" + TextFormatting.GOLD + "] " +
-                        TextFormatting.GREEN + (preIdentified ? "Identified starred item " : "Starred item Unidentified ") + TextFormatting.DARK_GREEN + itemName + TextFormatting.GREEN +
-                        " has dropped at " + TextFormatting.AQUA + item.getPosition().getX() + ", " + item.getPosition().getY() + ", " + item.getPosition().getZ() + TextFormatting.YELLOW + "!"
-        );
+        final String itemName = item.serializeNBT().getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Name");
+        final ItemType type = ItemType.Type.getType(itemName);
+        final TextComponentString iTextComponents;
+        switch(type) {
+            case MYTHIC:
+            iTextComponents = new TextComponentString(
+                    TextFormatting.LIGHT_PURPLE + "[" + TextFormatting.DARK_PURPLE + "!" + TextFormatting.LIGHT_PURPLE + "] " +
+                            TextFormatting.LIGHT_PURPLE + (preIdentified ? "Identified Mythic " : "Mythic Item Unidentified ") + TextFormatting.DARK_PURPLE + itemName + TextFormatting.LIGHT_PURPLE +
+                            " has dropped at " + TextFormatting.AQUA + item.getPosition().getX() + ", " + item.getPosition().getY() + ", " + item.getPosition().getZ() + TextFormatting.YELLOW + "!"
+            );
+            break;
+            case INGREDIENT:
+                iTextComponents = new TextComponentString(
+                        TextFormatting.GOLD + "[" + TextFormatting.YELLOW + "!" + TextFormatting.GOLD + "] " +
+                                TextFormatting.GREEN + "Starred ingredient " + TextFormatting.DARK_GREEN + itemName + TextFormatting.GREEN +
+                                " has dropped at " + TextFormatting.AQUA + item.getPosition().getX() + ", " + item.getPosition().getY() + ", " + item.getPosition().getZ() + TextFormatting.YELLOW + "!"
+                );
+                break;
+            case ITEM:
+            iTextComponents = new TextComponentString(
+                    TextFormatting.GOLD + "[" + TextFormatting.YELLOW + "!" + TextFormatting.GOLD + "] " +
+                            TextFormatting.GREEN + (preIdentified ? "Identified starred item " : "Starred item Unidentified ") + TextFormatting.DARK_GREEN + itemName + TextFormatting.GREEN +
+                            " has dropped at " + TextFormatting.AQUA + item.getPosition().getX() + ", " + item.getPosition().getY() + ", " + item.getPosition().getZ() + TextFormatting.YELLOW + "!"
+            );
+            break;
+            case UNKNOWN:
+            default:
+                return; // Unknown items usually cannot be labelled
+        }
         Style style = (new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(TextFormatting.GOLD + "Click to track the location!")))
                 .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/compass " + item.getPosition().getX() + " " + item.getPosition().getY() + " " + item.getPosition().getZ())));
-        nullSafeMessage.sendMessage((isMythic ? tMythic : tRegular).setStyle(style));
+        nullSafeMessage.sendMessage(iTextComponents.setStyle(style));
 
         if (Main.autoTrack) {
             ClientCommandHandler.instance.executeCommand(Minecraft.getMinecraft().player, "/compass " + item.getPosition().getX() + " " + item.getPosition().getY() + " " + item.getPosition().getZ());

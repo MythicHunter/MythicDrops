@@ -13,7 +13,6 @@ import net.minecraft.util.text.event.HoverEvent;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.io.IOException;
 import java.util.*;
 
 @ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
@@ -61,6 +60,9 @@ public class StarCommand extends CommandBase {
                 args2 = Arrays.copyOfRange(args, 1, args.length);
                 name = String.join(" ", args2);
                 Main.star.add(name);
+                if(ItemType.Type.getType(name) == ItemType.INGREDIENT) {
+                    nullSafeMessage.sendMessage("Ingredient detected, note that ingredients always use strict leniency.");
+                }
                 nullSafeMessage.sendMessage("Added " + name + " to star list.");
                 ConfigSpirit.save();
                 break;
