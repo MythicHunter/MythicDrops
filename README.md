@@ -14,7 +14,7 @@ Star also allows regex, commands:
 
 ## API Calls
 
-This mod by default, on startup, calls the API exactly once per launch (api.wynncraft.com)
+This mod by default, on startup, calls the API exactly twice per launch (api.wynncraft.com)
 
 You may make additional calls to update by /mythic reload
 
