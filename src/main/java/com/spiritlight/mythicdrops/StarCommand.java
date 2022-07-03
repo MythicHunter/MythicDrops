@@ -93,16 +93,18 @@ public class StarCommand extends CommandBase {
             case "add":
                 if(args.length == 2) {
                     for(String name : Main.itemList) {
-                        if(name.startsWith(args[1])) {
+                        if(name.toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))) {
                             value.add(name);
                         }
                     }
-                    return value;
-                } else return Main.itemList;
+                    return value.subList(0, Math.min(100, value.size()));
+                } else {
+                    return Main.itemList.subList(0, Math.min(100, Main.itemList.size()));
+                }
             case "remove":
                 if(args.length == 2) {
                     for(String name : Main.star) {
-                        if(name.startsWith(args[1])) {
+                        if(name.toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))) {
                             value.add(name);
                         }
                     }

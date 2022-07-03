@@ -19,25 +19,26 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ParametersAreNonnullByDefault
 public class DetectMythics {
     static final Map<UUID, NBTTagCompound> scannedUUID = new ConcurrentHashMap<>();
-    private static final status s = new status();
+    private static final AtomicBoolean STATUS = new AtomicBoolean(false);
 
     @SubscribeEvent
     public void itemEvent(final EntityEvent event) {
         if (!Main.enabled)
             return;
-        if (s.check())
+        if (STATUS.get())
             return;
         if (Minecraft.getMinecraft().world == null)
             return;
         try {
             CompletableFuture.runAsync(() -> {
-                s.on();
+                STATUS.set(true);
                 final List<Entity> worldEntity = new ArrayList<>(Minecraft.getMinecraft().world.getLoadedEntityList());
                 for (Entity e : worldEntity) {
                     if (!(e instanceof EntityItem)) continue;
@@ -63,13 +64,13 @@ public class DetectMythics {
                     checkItem((EntityItem) e);
                     scannedUUID.put(e.getUniqueID(), trimmedNBT);
                 }
-                s.off();
+                STATUS.set(false);
             }).exceptionally(e -> {
-                s.off();
+                STATUS.set(false);
                 nullSafeMessage.sendMessage("An error has occurred, please check logs.");
                 e.printStackTrace();
                 return null;
-            }).thenAccept(x -> s.off());
+            }).thenAccept(x -> STATUS.set(false));
         } catch (NullPointerException ignored) {}
     }
 
