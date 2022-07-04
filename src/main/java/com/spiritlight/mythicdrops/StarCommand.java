@@ -91,9 +91,11 @@ public class StarCommand extends CommandBase {
         List<String> value = new ArrayList<>();
         switch (args[0]) {
             case "add":
-                if(args.length == 2) {
+                if(args.length >= 2) {
+                    final String[] input = Arrays.copyOfRange(args, 1, args.length);
+                    final String result = String.join(" ", input);
                     for(String name : Main.itemList) {
-                        if(name.toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))) {
+                        if(name.toLowerCase(Locale.ROOT).startsWith(result.toLowerCase(Locale.ROOT))) {
                             value.add(name);
                         }
                     }
@@ -102,9 +104,11 @@ public class StarCommand extends CommandBase {
                     return Main.itemList.subList(0, Math.min(100, Main.itemList.size()));
                 }
             case "remove":
-                if(args.length == 2) {
+                if(args.length >= 2) {
+                    final String[] input = Arrays.copyOfRange(args, 1, args.length);
+                    final String result = String.join(" ", input);
                     for(String name : Main.star) {
-                        if(name.toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT))) {
+                        if(name.toLowerCase(Locale.ROOT).startsWith(result.toLowerCase(Locale.ROOT))) {
                             value.add(name);
                         }
                     }
