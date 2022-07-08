@@ -45,6 +45,7 @@ public class DetectMythics {
                     if (e.isGlowing()) continue;
                     if(e.getName().contains("NPC")) continue;
                     NBTTagCompound trimmedNBT = e.serializeNBT();
+                    if(trimmedNBT.toString().contains("Passengers")) continue;
                     trimmedNBT.removeTag("Age");
                     trimmedNBT.removeTag("Motion");
                     trimmedNBT.removeTag("Pos");
