@@ -56,7 +56,7 @@ public class DetectMythics {
                     if (scannedUUID.containsKey(e.getUniqueID()) && scannedUUID.get(e.getUniqueID()).equals(trimmedNBT))
                         continue;
                     if (Main.debug) {
-                        nullSafeMessage.sendMessage(new TextComponentString("Found item of " + e.getName()).setStyle(
+                        Minecraft.getMinecraft().player.sendMessage(new TextComponentString("Found item of " + e.getName()).setStyle(
                                 new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                         new TextComponentString(format("Wynncraft Item Name:" + e.serializeNBT().getCompoundTag("Item").getCompoundTag("tag").getCompoundTag("display").getString("Name") + "\n\n" + "Item name: " + (e.hasCustomName() ? e.getCustomNameTag() + "(" + e.getName() + ")" : e.getName()) + "\n" + "Item UUID: " + e.getUniqueID() + "\n\n" + e.serializeNBT() + "\n\nClick to track!")))
                                 ).setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/compass " +
@@ -158,7 +158,7 @@ public class DetectMythics {
         }
         Style style = (new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(TextFormatting.GOLD + "Click to track the location!")))
                 .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/compass " + item.getPosition().getX() + " " + item.getPosition().getY() + " " + item.getPosition().getZ())));
-        nullSafeMessage.sendMessage(iTextComponents.setStyle(style));
+        Minecraft.getMinecraft().player.sendMessage(iTextComponents.setStyle(style));
 
         if (Main.autoTrack) {
             ClientCommandHandler.instance.executeCommand(Minecraft.getMinecraft().player, "/compass " + item.getPosition().getX() + " " + item.getPosition().getY() + " " + item.getPosition().getZ());

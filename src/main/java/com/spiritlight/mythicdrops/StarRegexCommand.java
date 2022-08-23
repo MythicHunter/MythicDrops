@@ -1,6 +1,7 @@
 package com.spiritlight.mythicdrops;
 
 import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -56,7 +57,7 @@ public class StarRegexCommand extends CommandBase {
                     TextComponentString string = new TextComponentString("- " + s.pattern());
                     string.setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to remove!")))
                             .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/pattern remove " + s)));
-                    nullSafeMessage.sendMessage(string);
+                    Minecraft.getMinecraft().player.sendMessage(string);
                 }
                 break;
             case "clear":
@@ -83,7 +84,7 @@ public class StarRegexCommand extends CommandBase {
                 }  catch (PatternSyntaxException ex) {
                     ITextComponent s = new TextComponentString("The provided RegEx is invalid. Check https://regexr.com/ for RegEx (Hover for cause..)")
                             .setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(ex.getMessage()))));
-                    nullSafeMessage.sendMessage(s);
+                    Minecraft.getMinecraft().player.sendMessage(s);
                     return;
                 }
                 break;
@@ -101,7 +102,7 @@ public class StarRegexCommand extends CommandBase {
                 }  catch (PatternSyntaxException ex) {
                     ITextComponent s = new TextComponentString("The provided RegEx is invalid. Check https://regexr.com/ for RegEx (Hover for cause..)")
                             .setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(ex.getMessage()))));
-                    nullSafeMessage.sendMessage(s);
+                    Minecraft.getMinecraft().player.sendMessage(s);
                     return;
                 }
                 break;

@@ -1,6 +1,7 @@
 package com.spiritlight.mythicdrops;
 
 import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -49,7 +50,7 @@ public class StarCommand extends CommandBase {
                     TextComponentString string = new TextComponentString("- " + s);
                     string.setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to remove!")))
                             .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/star remove " + s)));
-                    nullSafeMessage.sendMessage(string);
+                    Minecraft.getMinecraft().player.sendMessage(string);
                 }
                 break;
             case "add":
