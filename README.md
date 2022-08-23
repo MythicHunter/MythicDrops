@@ -12,6 +12,9 @@ All commands are case-insensitive.
 Star also allows regex, commands:
 - /pattern <add/remove/list/test> [args...]
 
+See also:
+- /say <message>
+
 ## API Calls
 
 This mod by default, on startup, calls the API exactly twice per launch (api.wynncraft.com)
